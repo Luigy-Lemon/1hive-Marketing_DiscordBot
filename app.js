@@ -147,6 +147,11 @@ client.on('messageReactionAdd', (reaction, user) => {
             return;
         }
     }
+
+    if (reaction.message.channel.id === marketingChannelID && (reaction.emoji.name != '👍' || reaction.emoji.name != '👎' ) && !user.bot) {
+        reaction.emoji.delete()
+    }
+
     if (reaction.message.id === RegisterMessage.messageID && reaction.emoji.name === '✅' && !user.bot) {
         reaction.message.guild.members.fetch(user.id)
             .then(member => {
