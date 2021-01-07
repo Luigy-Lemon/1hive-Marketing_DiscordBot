@@ -1,0 +1,15 @@
+{
+  "dependencies": {
+    "discord.js": "^12.4.0",
+    "dotenv": "^8.2.0",
+    "node-cron": "^2.0.3",
+    "node-fetch": "^2.6.1"
+  },
+  "scripts": {
+    "start": "node ./app.js"
+  },
+  "name": "buzzmarketing-discord",
+  "version": "1.0.0",
+  "main": "app.js",
+  "license": "MIT"
+}
