@@ -148,71 +148,75 @@ client.on("message", async function (message) {
 
 client.on('messageReactionAdd', (reaction, user) => {
     // When we receive a reaction we check if the reaction is partial or not
-    if (reaction.partial) {
-        // If the message this reaction belongs to was removed the fetching might result in an API error, which we need to handle
-        try {
-            reaction.fetch();
-            reaction.message.fetch();
-        } catch (error) {
-            console.error('Something went wrong when fetching the message: ', error);
-            // Return as `reaction.message.author` may be undefined/null
-            return;
-        }
-    }
-
-    if (reaction.message.channel.id === marketingChannelID && reaction.emoji.name !== '👍' && reaction.emoji.name !== '👎' && !user.bot) {
-        try {
-            console.log('deleting: ' + reaction.emoji.name)
-            reaction.remove()
-        }
-        catch (err) { console.log(err) }
-    }
-
-    if (reaction.message.id === RegisterMessage.messageID && reaction.emoji.name === '✅' && !user.bot) {
-        reaction.message.guild.members.fetch(user.id)
-            .then(member => {
-                member.roles.add(`${RegisterMessage.roleID}`)
-                    .then(member => {
-                        console.log(`Added the role to ${member.displayName}`);
-                    })
-                    .catch(err => console.log(err))
+    if (reaction.message.channel.id === marketingChannelID || reaction.message.id === RegisterMessage.messageID) {
+        if (reaction.partial) {
+            // If the message this reaction belongs to was removed the fetching might result in an API error, which we need to handle
+            try {
+                reaction.fetch();
+                reaction.message.fetch();
+            } catch (error) {
+                console.error('Something went wrong when fetching the message: ', error);
+                // Return as `reaction.message.author` may be undefined/null
+                return;
             }
-            ).catch(err => console.log(err))
+        }
 
-        reaction.message.guild.roles.fetch(RegisterMessage.roleID)
-            .then(role => {
-                console.log('members changed to: ' + role.members.size)
-                MarketingRoleMembers = role.members.size
-            })
-            .catch(err => console.log(err))
+        if (reaction.message.channel.id === marketingChannelID && reaction.emoji.name !== '👍' && reaction.emoji.name !== '👎' && !user.bot) {
+            try {
+                console.log('deleting: ' + reaction.emoji.name)
+                reaction.remove()
+            }
+            catch (err) { console.log(err) }
+        }
 
+        if (reaction.message.id === RegisterMessage.messageID && reaction.emoji.name === '✅' && !user.bot) {
+            reaction.message.guild.members.fetch(user.id)
+                .then(member => {
+                    member.roles.add(`${RegisterMessage.roleID}`)
+                        .then(member => {
+                            console.log(`Added the role to ${member.displayName}`);
+                        })
+                        .catch(err => console.log(err))
+                }
+                ).catch(err => console.log(err))
+
+            reaction.message.guild.roles.fetch(RegisterMessage.roleID)
+                .then(role => {
+                    console.log('members changed to: ' + role.members.size)
+                    MarketingRoleMembers = role.members.size
+                })
+                .catch(err => console.log(err))
+
+        }
     }
 });
 
 client.on('messageReactionRemove', (reaction, user) => {
 
-    // When we receive a reaction we check if the reaction is partial or not
-    if (reaction.partial) {
-        // If the message this reaction belongs to was removed the fetching might result in an API error, which we need to handle
-        try {
-            reaction.fetch();
-        } catch (error) {
-            console.error('Something went wrong when fetching the message: ', error);
-            // Return as `reaction.message.author` may be undefined/null
-            return;
+    if (reaction.message.channel.id === marketingChannelID || reaction.message.id === RegisterMessage.messageID) {
+        // When we receive a reaction we check if the reaction is partial or not
+        if (reaction.partial) {
+            // If the message this reaction belongs to was removed the fetching might result in an API error, which we need to handle
+            try {
+                reaction.fetch();
+            } catch (error) {
+                console.error('Something went wrong when fetching the message: ', error);
+                // Return as `reaction.message.author` may be undefined/null
+                return;
+            }
         }
-    }
-    if (reaction.message.id === RegisterMessage.messageID && reaction.emoji.name === '✅' && !user.bot) {
-        reaction.message.guild.members.fetch(user.id)
-            .then(member => {
-                member.roles.remove(`${RegisterMessage.roleID}`)
-            })
-        reaction.message.guild.roles.fetch(RegisterMessage.roleID)
-            .then(role => {
-                console.log('members changed to: ' + role.members.size)
-                MarketingRoleMembers = role.members.size
-            })
-            .catch(err => console.log(err))
+        if (reaction.message.id === RegisterMessage.messageID && reaction.emoji.name === '✅' && !user.bot) {
+            reaction.message.guild.members.fetch(user.id)
+                .then(member => {
+                    member.roles.remove(`${RegisterMessage.roleID}`)
+                })
+            reaction.message.guild.roles.fetch(RegisterMessage.roleID)
+                .then(role => {
+                    console.log('members changed to: ' + role.members.size)
+                    MarketingRoleMembers = role.members.size
+                })
+                .catch(err => console.log(err))
+        }
     }
 });
 
