@@ -10,11 +10,14 @@ const guildID = process.env.GUILDID;
 function openNewTask(message, role) {
     let startTime = Date.now();
     let cheese = cron.schedule('0,30 * * * *', function () {
-        let shouldKill = runCollector(message, role, startTime)
-        if (shouldKill) {
-            console.log(`killed task for ${message.id}`)
-            cheese.destroy()
-        }
+        runCollector(message, role, startTime).then(
+            shouldKill => {
+                if (shouldKill) {
+                    console.log(`killed task for ${message.id}`)
+                    cheese.destroy()
+                }
+            }
+        )
     });
 }
 
@@ -50,22 +53,22 @@ async function runCollector(message, role, startTime) {
         }`);
         if (percentage >= 33 && usersVoted > 4) { //minimum 33% and users
             try {
-                message.react('☑️')
+                await message.react('☑️')
                 killTask = true
             }
             catch (err) { console.log(err) }
         }
         else if ((currentTime - startTime) > 86400000) {
             try {
-                message.react('❌')
+                await message.react('❌')
                 killTask = true
             }
             catch (err) { console.log(err) }
         }
 
-        else if (percentage <= 50 && usersVoted > 5) {
+        else if (percentage <= 50 && usersVoted > 4) {
             try {
-                message.delete({ timeout: 2500 })
+                await message.delete()
                 killTask = true
             }
             catch (err) { console.log(err) }
@@ -80,7 +83,7 @@ function onlyUnique(value, index, self) {
     return self.indexOf(value) === index;
 }
 
-async function getVoters(collected){
+async function getVoters(collected) {
     let voters = []
     for (let reaction of collected) {
         arr = await reaction[1].users.fetch()
@@ -91,11 +94,11 @@ async function getVoters(collected){
                 }
                 return usersArray
             })
-            .catch(err => console.log(err) )
-        voters = [...voters , ...arr]
+            .catch(err => console.log(err))
+        voters = [...voters, ...arr]
 
     }
-    return (voters)?voters:null
+    return (voters) ? voters : null
 }
 
 module.exports = { openNewTask }
