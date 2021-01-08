@@ -122,9 +122,11 @@ client.on("message", async function (message) {
         else if (command === "addTask"){
             message.channel.messages.fetch(arg[0]).then(msg =>{
                 openNewTask(msg, RegisterMessage.roleID);
-                message.reply(arg[0]+' message added to the task loop')
+                message.reply('message added to the task loop');
+                console.log('message added to the task loop'+ arg[0]);
             })
             .catch(err=> console.log(err))
+            
             
         }
     }
