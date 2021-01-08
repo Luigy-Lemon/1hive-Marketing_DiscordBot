@@ -9,7 +9,7 @@ const guildID = process.env.GUILDID;
 
 function openNewTask(message, role) {
     let startTime = Date.now();
-    let cheese = cron.schedule('* * * * *', function () {
+    let cheese = cron.schedule('0,30 * * * *', function () {
         let shouldKill = runCollector(message, role, startTime)
         if (shouldKill) {
             console.log(`killed task for ${message.id}`)
