@@ -1,6 +1,5 @@
 let cron = require('node-cron');
 const dotenv = require('dotenv').config(),
-    { getRole, getMessages, getMessage, createNewRole, deleteCurrentRole, purgeRegisterMessageReactions, setupRegisterMessage } = require("../utilities/discord.js");
 
 const marketingChannelID = process.env.MARKETING_CHANNELID;
 const adminRoleID = process.env.ADMIN_ROLEID;
