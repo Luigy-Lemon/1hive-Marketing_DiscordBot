@@ -1,5 +1,5 @@
 let cron = require('node-cron');
-const dotenv = require('dotenv').config(),
+const dotenv = require('dotenv').config();
 
 const marketingChannelID = process.env.MARKETING_CHANNELID;
 const adminRoleID = process.env.ADMIN_ROLEID;
