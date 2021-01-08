@@ -148,8 +148,9 @@ client.on('messageReactionAdd', (reaction, user) => {
         }
     }
 
-    if (reaction.message.channel.id === marketingChannelID && reaction.emoji.name !== '👍' && reaction.emoji.name != '👎'  && !user.bot) {
-        reaction.emoji.delete()
+    if (reaction.message.channel.id === marketingChannelID && reaction.emoji.name !== '👍' && reaction.emoji.name !== '👎'  && !user.bot) {
+        console.log('deleting: '+reaction.emoji.name)
+        reaction.remove()
     }
 
     if (reaction.message.id === RegisterMessage.messageID && reaction.emoji.name === '✅' && !user.bot) {
