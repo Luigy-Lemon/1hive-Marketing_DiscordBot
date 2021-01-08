@@ -9,7 +9,7 @@ const guildID = process.env.GUILDID;
 
 function openNewTask(message, role) {
     let startTime = Date.now();
-    let cheese = cron.schedule('0,30 * * * *', function () {
+    let cheese = cron.schedule('* * * * *', function () {
         let shouldKill = runCollector(message, role, startTime)
         if (shouldKill) {
             console.log(`killed task for ${message.id}`)
@@ -24,11 +24,11 @@ function getNumberOfMembersInRole(guild, roleID) {
     return membersSize
 }
 
-function runCollector(message, role, startTime) {
+async function runCollector(message, role, startTime) {
     let killTask = false
     const currentTime = Date.now();
     let registeredVoters = getNumberOfMembersInRole(message.channel.guild, role);
-    if ((currentTime - startTime) > 1200000) {
+    if ((currentTime - startTime) > 0) {
         console.log('running task')
 
         let collected = message.reactions.cache
@@ -37,14 +37,7 @@ function runCollector(message, role, startTime) {
         //    collector.on('end', collected => {
         let up = collected.filter(msg => msg.emoji.name === '👍').first()
         let down = collected.filter(msg => msg.emoji.name === '👎').first()
-        let usersVoted = [];
-
-        collected.each(msg => {
-            msg.users.cache.each(user => {
-                usersVoted.push(user.id)
-            })
-        });
-
+        let usersVoted = await getVoters(collected)
         usersVoted = usersVoted.filter(onlyUnique).length - 1
         let score = (usersVoted > 0) ? (up.count - down.count) : 0
         let percentage = (score) ? (score / registeredVoters) * 100 : -1
@@ -70,9 +63,9 @@ function runCollector(message, role, startTime) {
             catch (err) { console.log(err) }
         }
 
-        else if(percentage <=50 && usersVoted > 5){
+        else if (percentage <= 50 && usersVoted > 5) {
             try {
-                message.delete({timeout:2500})
+                message.delete({ timeout: 2500 })
                 killTask = true
             }
             catch (err) { console.log(err) }
@@ -85,6 +78,24 @@ function runCollector(message, role, startTime) {
 
 function onlyUnique(value, index, self) {
     return self.indexOf(value) === index;
+}
+
+async function getVoters(collected){
+    let voters = []
+    for (let reaction of collected) {
+        arr = await reaction[1].users.fetch()
+            .then(users => {
+                let usersArray = []
+                for (const user of users) {
+                    usersArray.push(user[0])
+                }
+                return usersArray
+            })
+            .catch(err => console.log(err) )
+        voters = [...voters , ...arr]
+
+    }
+    return (voters)?voters:null
 }
 
 module.exports = { openNewTask }

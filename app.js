@@ -121,7 +121,6 @@ client.on("message", async function (message) {
 
         else if (command === "add-task") {
             let channel = message.guild.channels.cache.get(marketingChannelID)
-            console.log(channel)
             channel.messages.fetch(args[0])
                 .then(msg => {
                     openNewTask(msg, RegisterMessage.roleID);
