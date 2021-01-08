@@ -118,6 +118,13 @@ client.on("message", async function (message) {
         else if (command === "reveal") {
             //getReactionsByMessageID()
         }
+
+        else if (command === "addTask"){
+            message.channel.messages.fetch(arg[0]).then(msg =>
+                openNewTask(msg, RegisterMessage.roleID)
+            )
+            
+        }
     }
     else {
         if (message.channel.id === marketingChannelID && prefix != message.content.slice(0, prefix.length)) {
