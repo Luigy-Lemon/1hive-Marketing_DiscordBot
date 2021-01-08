@@ -9,7 +9,7 @@ const path = require('path'),
 
 
 
-const client = new Discord.Client({ messageCacheMaxSize: 2000, fetchAllMembers: true, partials: ['MESSAGE', 'CHANNEL', 'REACTION','GUILD_MEMBER'] });
+const client = new Discord.Client({ messageCacheMaxSize: 2000, fetchAllMembers: true, partials: ['MESSAGE', 'CHANNEL', 'REACTION', 'GUILD_MEMBER'] });
 const prefix = "config ";
 
 let RegisterMessage = {
@@ -119,15 +119,16 @@ client.on("message", async function (message) {
             //getReactionsByMessageID()
         }
 
-        else if (command === "addTask"){
-            message.channel.messages.fetch(arg[0]).then(msg =>{
-                openNewTask(msg, RegisterMessage.roleID);
-                message.reply('message added to the task loop');
-                console.log('message added to the task loop'+ arg[0]);
-            })
-            .catch(err=> console.log(err))
-            
-            
+        else if (command === "add-task") {
+            let channel = message.guild.channels.cache.get(marketingChannelID)
+            console.log(channel)
+            channel.messages.fetch(args[0])
+                .then(msg => {
+                    openNewTask(msg, RegisterMessage.roleID);
+                    message.reply('message added to the task loop');
+                    console.log('message added to the task loop ' + args[0]);
+                })
+                .catch(err => console.log(err))
         }
     }
     else {
@@ -159,12 +160,12 @@ client.on('messageReactionAdd', (reaction, user) => {
         }
     }
 
-    if (reaction.message.channel.id === marketingChannelID && reaction.emoji.name !== '👍' && reaction.emoji.name !== '👎'  && !user.bot) {
-        try{
-        console.log('deleting: '+reaction.emoji.name)
-        reaction.remove()
+    if (reaction.message.channel.id === marketingChannelID && reaction.emoji.name !== '👍' && reaction.emoji.name !== '👎' && !user.bot) {
+        try {
+            console.log('deleting: ' + reaction.emoji.name)
+            reaction.remove()
         }
-        catch(err){console.log(err)}
+        catch (err) { console.log(err) }
     }
 
     if (reaction.message.id === RegisterMessage.messageID && reaction.emoji.name === '✅' && !user.bot) {
