@@ -43,7 +43,7 @@ async function runCollector(message, role, startTime) {
         let usersVoted = await getVoters(collected)
         usersVoted = usersVoted.filter(onlyUnique).length - 1
         let score = (usersVoted > 0) ? (up.count - down.count) : 0
-        let percentage = (score) ? (score / registeredVoters) * 100 : -1
+        let percentage = (score) ? (score / usersVoted) * 100 : -1
         console.log(`
         {\n message: ${message.id}\n
             upvotes:  ${up.count}\n
@@ -51,7 +51,7 @@ async function runCollector(message, role, startTime) {
             usersVoted: ${usersVoted} out of ${registeredVoters}\n
             percentage score: ${percentage}%\n
         }`);
-        if (percentage >= 33 && usersVoted > 4) { //minimum 33% and users
+        if (percentage >= 33 && usersVoted > (registeredVoters / 5)) { //minimum 33% and users
             try {
                 await message.react('☑️')
                 killTask = true
@@ -66,7 +66,7 @@ async function runCollector(message, role, startTime) {
             catch (err) { console.log(err) }
         }
 
-        else if (percentage <= 50 && usersVoted > 4) {
+        else if (percentage <= -50 && usersVoted > (registeredVoters / 5)) {
             try {
                 await message.delete()
                 killTask = true
