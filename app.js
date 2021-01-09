@@ -163,7 +163,7 @@ client.on('messageReactionAdd', (reaction, user) => {
         if (reaction.message.channel.id === marketingChannelID && reaction.emoji.name !== '👍' && reaction.emoji.name !== '👎' && !user.bot) {
             try {
                 console.log('deleting: ' + reaction.emoji.name)
-                reaction.remove()
+                reaction.users.remove(user)
             }
             catch (err) { console.log(err) }
         }
