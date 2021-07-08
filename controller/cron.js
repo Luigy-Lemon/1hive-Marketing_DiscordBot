@@ -53,14 +53,15 @@ async function runCollector(message, role, startTime) {
         }`);
         if (percentage >= 33 && usersVoted > (registeredVoters / 5)) { //minimum 33% and users
             try {
-                await message.react('☑️')
+                const confirmationEmoji = message.guild.emojis.cache.find(em => em.name === "Honeypot") || "☑️"
+                await message.react(confirmationEmoji)
                 killTask = true
             }
             catch (err) { console.log(err) }
         }
         else if ((currentTime - startTime) > 86400000) {
             try {
-                await message.react('❌')
+                await message.react('💩')
                 killTask = true
             }
             catch (err) { console.log(err) }
