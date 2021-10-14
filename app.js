@@ -9,7 +9,17 @@ const path = require('path'),
 
 
 
-const client = new Discord.Client({ messageCacheMaxSize: 2000, fetchAllMembers: true, partials: ['MESSAGE', 'CHANNEL', 'REACTION', 'GUILD_MEMBER'] });
+const client = new Discord.Client({ 
+    messageCacheMaxSize: 2000, 
+    fetchAllMembers: true, 
+    partials: ['MESSAGE', 'CHANNEL', 'REACTION', 'GUILD_MEMBER'],
+    intents: [
+        "GUILDS",
+        "GUILD_MESSAGES",
+        "GUILD_MESSAGE_REACTIONS",
+        "GUILD_MEMBERS",
+      ]
+});
 const prefix = "config ";
 
 let RegisterMessage = {
@@ -54,7 +64,7 @@ client.once('ready', async () => {
 });
 
 
-client.on("message", async function (message) {
+client.on("messageCreate", async function (message) {
     if (!cachedChannels.includes(message.channel.id)) return
     if (message.author.bot) return;
 
@@ -137,6 +147,7 @@ client.on("message", async function (message) {
             console.log('author ' + message.author.id)
             message.react('👍')
                 .then(() => message.react('👎'))
+                .then(() => message.react('💡'))
                 .catch(() => console.error('One of the emojis failed to react.'));
 
             openNewTask(message, RegisterMessage.roleID)
@@ -160,12 +171,49 @@ client.on('messageReactionAdd', (reaction, user) => {
             }
         }
 
-        if (reaction.message.channel.id === marketingChannelID && reaction.emoji.name !== '👍' && reaction.emoji.name !== '👎' && !user.bot) {
+        if (reaction.message.channel.id === marketingChannelID && reaction.emoji.name !== '👍' && reaction.emoji.name !== '👎' && reaction.emoji.name !== '💡' && !user.bot) {
             try {
                 console.log('deleting: ' + reaction.emoji.name)
                 reaction.users.remove(user)
             }
             catch (err) { console.log(err) }
+        }
+
+        if (reaction.message.channel.id === marketingChannelID && reaction.emoji.name === '💡' && user === reaction.message.author)
+            reaction.users.remove(user)
+
+        if (reaction.message.channel.id === marketingChannelID && reaction.emoji.name === '💡' && !user.bot && user !== reaction.message.author) {
+            try {
+                reaction.message.channel.threads.create({
+                    name: "Suggestion thread",
+                    autoArchiveDuration: 60,
+                    reason: "A suggestion for the OP was created"
+                }).then(async threadChannel => {
+                    const threadInitialMessage = await threadChannel.send(`[<@${user.id}>] has requested for [<@${reaction.message.author.id}>] to review the current #social-curation material that is pending to be posted Please continue the discussion in the thread below. \n\nTo mark the discussion as solved, please react to this message with ✅`)
+
+                    const filter = (rxn, reactUser) => rxn.emoji.name === '✅' && (reactUser.id === user.id || reactUser.id === reaction.message.author.id)
+                    const collector = threadInitialMessage.createReactionCollector({ filter, time: 86400000, dispose: true })
+
+                    setTimeout(() => {
+                        if (!collector.ended) threadChannel.send(`<@${user.id}>, <@${reaction.message.author.id}> has this discussion been solved yet? Please react with ✅ in the original message if so.`)
+                    }, 43200000)
+
+                    collector.on(
+                        'collect',
+                        (_, u) => {
+                            threadChannel.send(`\`${u.username} has marked the suggestion as completed.\``)
+                            if (collector.users.hasAll(user.id, reaction.message.author.id)) collector.stop()
+                        }
+                    )
+
+                    collector.on('end', async () => {
+                        await threadChannel.send('Archiving channel')
+                        await threadChannel.setArchived(true)
+
+                        reaction.users.remove(user)
+                    })
+                })
+            } catch (err) { console.log(err) }
         }
 
         if (reaction.message.id === RegisterMessage.messageID && reaction.emoji.name === '✅' && !user.bot) {
