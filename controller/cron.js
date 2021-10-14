@@ -35,11 +35,13 @@ async function runCollector(message, role, startTime) {
         console.log('running task')
 
         let collected = message.reactions.cache
+        const suggestionsCollected = collected.filter(r => r.emoji.name === '💡')
         collected = collected.filter(r => ['👍', '👎'].includes(r.emoji.name))
         //    const collector = message.createReactionCollector(r => ['👍','👎'].includes(r.emoji.name), {time:3000, idle:2000});
         //    collector.on('end', collected => {
         let up = collected.filter(msg => msg.emoji.name === '👍').first()
         let down = collected.filter(msg => msg.emoji.name === '👎').first()
+        const suggestions = suggestionsCollected.filter(msg => msg.emoji.name === '💡').first()
         let usersVoted = await getVoters(collected)
         usersVoted = usersVoted.filter(onlyUnique).length - 1
         let score = (usersVoted > 0) ? (up.count - down.count) : 0
@@ -51,7 +53,7 @@ async function runCollector(message, role, startTime) {
             usersVoted: ${usersVoted} out of ${registeredVoters}\n
             percentage score: ${percentage}%\n
         }`);
-        if (percentage >= 33 && usersVoted > (registeredVoters / 5)) { //minimum 33% and users
+        if (percentage >= 33 && usersVoted > (registeredVoters / 5) && suggestions.count <= 1) { //minimum 33% and users
             try {
                 const confirmationEmoji = message.guild.emojis.cache.find(em => em.name === "Honeypot") || "☑️"
                 await message.react(confirmationEmoji)
